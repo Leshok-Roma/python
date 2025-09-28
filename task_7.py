@@ -1,6 +1,6 @@
-s = int(input("Введите количество секунд: "))
+input_seconds = int(input("Введите количество секунд: "))
 
-m = s // 60
-ss = s % 60
+minutes = input_seconds // 60
+seconds = s % 60
 
-print(f"{s} секунд - {m} минут {ss} секунд")
+print(f"{input_seconds} секунд - {minutes} минут {seconds} секунд")

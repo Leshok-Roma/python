@@ -1,14 +1,14 @@
 ip = input("Введите IP-адрес: ")
-p = ip.split('.')
-v = len(p) == 4
-
-if v:
+parts_of_ip = ip.split('.')
+print(parts_of_ip)
+correct  = len(parts_of_ip) == 4
+if correct:
    
-    v= (
-        p[0].isdigit() and 0 <= int(p[0]) <= 255 and
-        p[1].isdigit() and 0 <= int(p[1]) <= 255 and
-        p[2].isdigit() and 0 <= int(p[2]) <= 255 and
-        p[3].isdigit() and 0 <= int(p[3]) <= 255
+    correct= (
+        parts_of_ip[0].isdigit() and 0 <= int(parts_of_ip[0]) <= 255 and
+        parts_of_ip[1].isdigit() and 0 <= int(parts_of_ip[1]) <= 255 and
+        parts_of_ip[2].isdigit() and 0 <= int(parts_of_ip[2]) <= 255 and
+        parts_of_ip[3].isdigit() and 0 <= int(parts_of_ip[3]) <= 255
     )
 
-print("Корректный IP-адрес" if v else "Некорректный IP-адрес")
+print("Корректный IP-адрес" if correct else "Некорректный IP-адрес")
