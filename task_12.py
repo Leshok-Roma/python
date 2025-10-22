@@ -22,12 +22,15 @@ total = total_1+ tax
 
 print(f"\nБазовая стоимость: {price} руб.")
 
+sum_all_extra = e_internet_pr + e_sms_pr + e_internet_pr
+
 if e_minutes > 0:
     print(f"Доп. минуты ({e_minutes}): {e_minutes_pr} руб.")
 if e_sms > 0:
     print(f"Доп. SMS ({e_sms}): {e_sms_pr} руб.")
 if e_internet > 0:
     print(f"Доп. интернет ({e_internet} МБ): {e_internet_pr} руб.")
+print(f"Сумма всех дополнительных плат {sum_all_extra}")
 
 print(f"Налог (2%): {tax} руб.")
 print(f"Итого к оплате: {total} руб.")
