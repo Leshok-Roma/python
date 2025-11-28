@@ -69,7 +69,7 @@ class Order:
         for i , item in enumerate(self.items, 1 ):
             item_total = item['price'] * item['quantity'] 
             total_sum += item_total
-            print(f"{i}. {item['coffee']} {item['size']}ml x {item['quantity']} - ${item_total:.2f}")  # ИСПРАВЛЕНО: кавычки и символ $
+            print(f"{i}. {item['coffee']} {item['size']}ml x {item['quantity']} - ${item_total:.2f}")  
         print(f'Total: ${total_sum:.2f}')  
     
     def is_empty(self):
@@ -176,7 +176,7 @@ class CoffeeShop:
             f.write(f"Order N{order.number}\n\n")
             for item in order.items:
                 total = item["price"] * item['quantity']
-                f.write(f"{item['coffee']} {item['size']}ml x {item['quantity']} - ${total:.2f}\n")  # ИСПРАВЛЕНО: кавычки и символ $
+                f.write(f"{item['coffee']} {item['size']}ml x {item['quantity']} - ${total:.2f}\n")  
             f.write(f"\nTotal: ${order.get_total():.2f}\n")  
         print(f'Receipt was saved to file: {filename}')
 
