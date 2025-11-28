@@ -1,213 +1,243 @@
-class CoffeeShopError(Exception):
+class CoffeeError(Exception):
     pass
 
-class CoffeeNotFoundError(CoffeeShopError):
+class CoffeeNotFoundError(CoffeeError):
     pass
 
-class CoffeeExistsError(CoffeeShopError):
+class InvalidInputError(CoffeeError):
     pass
 
-class InvalidSizeError(CoffeeShopError):
+class SizeNotFoundError(CoffeeError):
     pass
 
-class Coffee(): 
-    
-    def __init__(self, name='', coffee_type='', base_price=0.0, available_sizes=None): 
+
+class Coffee:
+    def __init__(self, name):
         self.name = name
-        self.coffee_type = coffee_type
-        self.base_price = base_price
-        self.available_sizes = available_sizes if available_sizes else []
+        self.prices = {}  
+    
+    def add_size(self, size, price):
+        if price <= 0:
+            raise InvalidInputError("Price must be positive")
+        self.prices[size] = price
     
     def get_info(self):
-        sizes_prices = ", ".join([f"{size}ml (${self.calculate_price(size):.2f})" 
-                                for size in self.available_sizes])
-        return f"{self.name} ({self.coffee_type}) - {sizes_prices}"
-        
+        info = f"{self.name}: "
+        sizes_info = []
+        for size, price in self.prices.items():
+            sizes_info.append(f"{size}ml - ${price:.2f}")
+        return info + ", ".join(sizes_info)
     
-    def calculate_price(self, size):
-        size_multiplier = {200: 1.0 , 300: 1.1 ,400: 1.2, 500: 1.3}
-        return self.base_price * size_multiplier.get(size, 1.0)
+    def get_price(self, size):
+        if size not in self.prices:
+            raise SizeNotFoundError(f"Size {size}ml doesn't available for {self.name}")
+        return self.prices[size]
+    
+class Order:
+    
+    def __init__ (self, number):
+        self.number = number 
+        self.items = []
 
-class CoffeeOrder(): 
+    def add_coffee(self, coffee_name, size , quantity , price):
+        if quantity <= 0  : 
+            raise InvalidInputError("Quantity must be positive")
+        self.items.append({
+            "coffee": coffee_name,
+            "size": size, 
+            "quantity" : quantity , 
+            "price": price 
+        })
     
-    def __init__(self, number=0): 
-        self.number = number
-        self.items = []  
-    
-    def add_item(self, coffee, size, quantity):
-        if quantity <= 0:
-            raise InvalidSizeError("quantity should be positive")
-        if size not in coffee.available_sizes:
-            raise InvalidSizeError(f"size {size}ml isn't available for {coffee.name}")
-        
-        self.items.append({'coffee': coffee,'size': size, 'quantity': quantity })
-    
-    def remove_item(self, index):
+    def remove_coffee(self, index ):
         if index < 0 or index >= len(self.items):
-            raise CoffeeNotFoundError("item not found in order")
-
+            raise CoffeeNotFoundError("Coffee wasn't found in order")
         del self.items[index]
-    
-    def get_total(self):
-        total = 0.0
+
+    def get_total(self): 
+        total    = 0.0 
         for item in self.items:
-            price = item['coffee'].calculate_price(item['size'])
-            total += price * item['quantity']
+            total += item['quantity'] * item['price']
         return total
     
     def show_order(self):
         if not self.items:
-            print("order is empty")
+            print("Order is empty")
             return
-        
-        print(f"Order N{self.number}:")
-        for i, item in enumerate(self.items, 1):
-            coffee = item['coffee']
-            size = item['size']
-            quantity = item['quantity']
-            price = coffee.calculate_price(size)
-            total = price * quantity
-            print(f"  {i}. {coffee.name} {size}ml x {quantity} - ${total:.2f}")
-        print(f"Total: ${self.get_total():.2f}")
-
-
-class CoffeeShop(): 
-    def __init__(self, name=''): 
+        print(f'Order N{self.number}: ')
+        total_sum = 0.0 
+        for i , item in enumerate(self.items, 1 ):
+            item_total = item['price'] * item['quantity'] 
+            total_sum += item_total
+            print(f"{i}. {item['coffee']} {item['size']}ml x {item['quantity']} - ${item_total:.2f}")  # ИСПРАВЛЕНО: кавычки и символ $
+        print(f'Total: ${total_sum:.2f}')  
+    
+    def is_empty(self):
+        return len(self.items) == 0
+class CoffeeShop:
+    
+    def __init__(self, name):
         self.name = name
-        self.espresso_drinks = {}
-        self.milk_drinks = {}
-        self.special_drinks = {}
-        self.order_counter = 1
+        self.menu  = {}
+        self.order_counter = 1 
     
-    def add_coffee(self, name, coffee_type, base_price, available_sizes):
-        name = name.lower()
-        coffee_type = coffee_type.lower()
-        
-        
-        if (name in self.espresso_drinks or 
-            name in self.milk_drinks or 
-            name in self.special_drinks):
-            raise CoffeeExistsError(f"coffee '{name}' already exists")
-        
-        if base_price <= 0:
-            raise ValueError("base_price have to be positive")        
-        if not available_sizes:
-            raise InvalidSizeError("available_sizes cannot be empty")        
-        coffee = Coffee(name, coffee_type, base_price, available_sizes)        
-        if coffee_type == 'espresso':
-            self.espresso_drinks[name] = coffee
-        elif coffee_type == 'milk':
-            self.milk_drinks[name] = coffee
-        elif coffee_type == 'special':
-            self.special_drinks[name] = coffee
-        else:
-            raise ValueError("coffee_type must be espresso, milk or special")
+    def add_coffee_to_menu(self, name):
+        # if name in self.menu:  
+        #     raise CoffeeError(f"Coffee {name} already exists") 
+        self.menu[name] = Coffee(name)
+        print(f"Coffee {name} was added to menu")
+
+    def add_size_to_coffee(self, coffee_name, size, price):
+        if coffee_name not in self.menu:
+            raise CoffeeNotFoundError(f"Coffee {coffee_name} wasn't found in menu")
+        self.menu[coffee_name].add_size(size, price)
+        print(f'Size {size}ml was added for coffee {coffee_name}')    
     
-    def remove_coffee(self, name):
-        name = name.lower()        
-        if name in self.espresso_drinks:
-            del self.espresso_drinks[name]
-        elif name in self.milk_drinks:
-            del self.milk_drinks[name]
-        elif name in self.special_drinks:
-            del self.special_drinks[name]
-        else:
-            raise CoffeeNotFoundError(f"coffee '{name}' not found")
-    
-    def find_coffee(self, coffee_name):        
-        coffe_name = coffee_name.lower()
-        if coffee_name in self.espresso_drinks:
-            return self.espresso_drinks[coffee_name]
-        elif coffee_name in self.milk_drinks:
-            return self.milk_drinks[coffee_name]
-        elif coffee_name in self.special_drinks:
-            return self.special_drinks[coffee_name]
-        else:
-            return None
+    def remove_coffee_from_menu(self, coffee_name):
+        if coffee_name not in self.menu:
+            raise CoffeeNotFoundError(f"Coffee '{coffee_name}' not found in menu")
+        
+        del self.menu[coffee_name]
+        print(f"Coffee '{coffee_name}' removed from menu")
     
     def show_menu(self):
-        print(f"{self.name} MENU:")
-        if self.espresso_drinks:
-            print("Espresso drinks:")
-            for coffe in self.espresso_drinks.values():
-                print(f' {coffe.get_info()} ')        
-        if self.milk_drinks:
-            print("Milk drinks:")
-            for coffee in self.milk_drinks.values():
-                print(f"  {coffee.get_info()}")
-        
-        if self.special_drinks:
-            print("Special drinks:")
-            for coffee in self.special_drinks.values():
-                print(f"  {coffee.get_info()}")
+        if not self.menu:
+            print("Menu is empty")
+            return
+        print("Menu:")
+        for coffee in self.menu.values():
+            print(f'  {coffee.get_info()}') 
     
     def create_order(self):
-       pass
-    
-    def print_receipt(self, order):
-        filename = f'coffee_receipt_{order.number}.txt'        
-        with open(filename, 'w') as f:
-            f.write(f" {self.name} receipt ")            
-            f.write(f"Order: N{order.number}")
+        order = Order(self.order_counter)
+        self.order_counter += 1
+        
+        while True:
+            print(f"\nOrder {order.number}")  
+            order.show_order()
+            print("\n1. Add coffee")
+            print("2. Remove coffee")
+            print("3. Finish order")
+            print("4. Cancel order")
+            choice = input("Choose action: ")           
+            try:
+                if choice == "1":
+                    self.show_menu()
+                    coffee_name = input("Coffee name: ")
+                    
+                    if coffee_name not in self.menu:
+                        raise CoffeeNotFoundError("Coffee wasn't found in menu")  
+                    
+                    coffee = self.menu[coffee_name]
+                    print(f"Available sizes for {coffee_name}:")
+                    for size, price in coffee.prices.items():
+                        print(f"  {size}ml - ${price:.2f}")  
+                    
+                    size = int(input("Size (ml): "))
+                    quantity = int(input("Quantity: "))
+                    
+                    price = coffee.get_price(size)
+                    order.add_coffee(coffee_name, size, quantity, price)
+                    print(f"Added {quantity} x {coffee_name} {size}ml")
+                
+                elif choice == "2":
+                    if order.is_empty():
+                        print("Order is empty")
+                        continue
+                    
+                    order.show_order()
+                    index = int(input("Item number to remove: ")) - 1
+                    removed_item = order.items[index]
+                    order.remove_coffee(index)
+                    print(f"Removed: {removed_item['coffee']} {removed_item['size']}ml")
+                
+                elif choice == "3":
+                    if not order.is_empty():
+                        self.save_receipt(order)
+                        print("Order completed successfully")
+                        break
+                    else:
+                        print("Order is empty, cannot finish empty order")
+                        continue  
+                
+                elif choice == "4":
+                    print("Order cancelled")
+                    break                      
+                else:
+                    print("Invalid choice")
             
+            except (CoffeeError, ValueError) as e:
+                print(f"Error: {e}")
+    
+    def save_receipt(self, order):
+        filename = f"order_receipt_{order.number}.txt"
+        with open(filename, 'w') as f: 
+            f.write(f"{self.name}\n")
+            f.write(f"Order N{order.number}\n\n")
             for item in order.items:
-                coffee = item['coffee']
-                size = item['size']
-                quantity = item['quantity']
-                price = coffee.calculate_price(size)
-                total = price * quantity
-                f.write(f"{coffee.name} {size}ml * {quantity} - ${total:.2f}\n")
-            
-            f.write(f"\nTOTAL: ${order.get_total():.2f}\n")
-            f.write("Enjoy your coffee!")
-        
-        print(f'receipt saved to {filename}')
+                total = item["price"] * item['quantity']
+                f.write(f"{item['coffee']} {item['size']}ml x {item['quantity']} - ${total:.2f}\n")  # ИСПРАВЛЕНО: кавычки и символ $
+            f.write(f"\nTotal: ${order.get_total():.2f}\n")  
+        print(f'Receipt was saved to file: {filename}')
 
-coffee_shop = CoffeeShop("CoffeeShop")
-try:
-    coffee_shop.add_coffee("espresso", "espresso", 2.00, [200, 300])
-    coffee_shop.add_coffee("americano", "espresso", 2.50, [300, 400, 500])
-    coffee_shop.add_coffee("cappuccino", "milk", 2.70, [300, 400])
-    coffee_shop.add_coffee("latte", "milk", 3.00, [300, 400, 500])
-    
-    coffee_shop.add_coffee("raf", "special", 4.00, [300, 400, 500])
-except CoffeeShopError as e:
-    print(f'Error: {e}')
-
-while True: 
-    print("\ncoffee shop")
-    print("1: show menu")
-    print("2: add coffee")
-    print("3: remove coffee")
-    print("4: create order")
-    print("0: exit")
-    choice = input("choose action: ") 
+def main():
+    coffee_shop = CoffeeShop("Coffee Time")
+    coffee_shop.add_coffee_to_menu("Espresso")
     try:
-        if choice == "1": 
-            coffee_shop.show_menu()
+        coffee_shop.add_coffee_to_menu("Espresso")
+        coffee_shop.add_coffee_to_menu("Americano")
+        coffee_shop.add_coffee_to_menu("Cappuccino")
+        coffee_shop.add_coffee_to_menu("Latte")              
+        coffee_shop.add_size_to_coffee("Espresso", 200, 1.00)
+        coffee_shop.add_size_to_coffee("Espresso", 300, 1.50)        
+        coffee_shop.add_size_to_coffee("Americano", 300, 2.0)
+        coffee_shop.add_size_to_coffee("Americano", 400, 2.50)
+        coffee_shop.add_size_to_coffee("Americano", 500, 3.00)        
+        coffee_shop.add_size_to_coffee("Cappuccino", 300, 3.00)
+        coffee_shop.add_size_to_coffee("Cappuccino", 400, 3.50)        
+        coffee_shop.add_size_to_coffee("Latte", 300, 3.50)
+        coffee_shop.add_size_to_coffee("Latte", 400, 4.00)
+        coffee_shop.add_size_to_coffee("Latte", 500, 4.50)
         
-        elif choice == '2': 
-            name = input("coffee name: ")
-            coffee_type = input("type (espresso/milk/special): ")
-            base_price = float(input("base price for 200ml: "))
-            sizes_input = input("available sizes: (200,300,400): ")
-            available_sizes = [int(size.strip()) for size in sizes_input.split(',')]            
-            coffee_shop.add_coffee(name, coffee_type, base_price, available_sizes)
-            print("coffee added successfully")
+    except CoffeeError as e:
+         print(f"Error: {e}")   
+    
+    while True:
+        print("\nCoffee Shop")  
+        print("1. Show menu")
+        print("2. Add coffee to menu")
+        print("3. Add size to coffee")
+        print("4. Remove coffee from menu")
+        print("5. Create order")
+        print("6. Exit")
         
-        elif choice == '3': 
-            name = input("coffee name: ")
-            coffee_shop.remove_coffee(name)            
-            print(f"{name} coffee removed ")
-
-        elif choice == '4': 
-            coffee_shop.create_order()
-        
-        elif choice == '0':
-            print("HAPPY END")
-            break
-        else: 
-            print("incorrect input")
+        choice = input("Choose action: ")        
+        try:
+            if choice == "1":
+                coffee_shop.show_menu()            
+            elif choice == "2":
+                name = input("Coffee name: ")
+                coffee_shop.add_coffee_to_menu(name)            
+            elif choice == '3':
+                coffee_name = input("Coffee name: ")
+                size = int(input("Size (ml): "))
+                price = float(input("Price: ")) 
+                coffee_shop.add_size_to_coffee(coffee_name, size, price)  
+            elif choice == "4":
+                name = input("Coffee name to remove: ")
+                coffee_shop.remove_coffee_from_menu(name)            
+            elif choice == "5":
+                coffee_shop.create_order()            
+            elif choice == "6":
+                print("Happy end!")
+                break
             
-    except (CoffeeShopError, ValueError) as e: 
-        print(f'Error: {e}')    
+            else:
+                print("Incorrect choice. Try again")
+        
+        except (CoffeeError, ValueError) as e:
+            print(f"Error: {e}")
+
+
+if __name__ == "__main__":
+    main()
