@@ -1,47 +1,42 @@
-import numpy as np
-import pandas as pd
-import matplotlib.pyplot as plt
-import seaborn as sns
 from faker import Faker
-import random
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt 
+import seaborn as sns
 
 fake = Faker('ru_RU')
-random.seed(42)
-np.random.seed(42)
+Faker.seed(42)
+
 years = [2021, 2022, 2023, 2024, 2025]
 forms = ["очная", "заочная"]
 specialties = ["Прикладная Информатика", "Кибербезопасность", "Радиофизика"]
-subjects = ["Математика", "Физика", "Язык"]
+
 students = []
-for _ in range(300):  
-    fio = fake.name()
-    year = random.choice(years)
-    form = random.choice(forms)
-    speciality = random.choice(specialties)
-    math_score = max(0, min(100, np.random.normal(75, 12)))
-    physics_score = max(0, min(100, np.random.normal(70, 15)))
-    language_score = max(0, min(100, np.random.normal(80, 10)))
+
+for _ in range(300):
+    math_score = fake.pyfloat(min_value=55, max_value=95, right_digits=1)
+    physics_score = fake.pyfloat(min_value=50, max_value=90, right_digits=1)
+    language_score = fake.pyfloat(min_value=65, max_value=95, right_digits=1)
+    att_score = fake.pyfloat(min_value=7.0, max_value=9.5, right_digits=1)
     avg_exam_score = (math_score + physics_score + language_score) / 3
-    att_score = max(1, min(10, np.random.normal(8.2, 0.8)))
-    total_score = math_score + physics_score + language_score + att_score*10 
-    address = fake.city()
-    phone = fake.phone_number()
+    total_score = math_score + physics_score + language_score + att_score * 10
     students.append({
-        "ФИО": fio,
-        "Год поступления": year,
-        "Форма обучения": form,
-        "Специальность": speciality,
+        "ФИО": fake.name(),
+        "Год поступления": fake.random_element(years),
+        "Форма обучения": fake.random_element(forms),
+        "Специальность": fake.random_element(specialties),
         "Балл_Математика": round(math_score, 1),
         "Балл_Физика": round(physics_score, 1),
         "Балл_Язык": round(language_score, 1),
-        "Балл_ЦЭ_ЦТ": round(avg_exam_score, 1),  
+        "Балл_ЦЭ_ЦТ": round(avg_exam_score, 1),
         "Балл_аттестата": round(att_score, 1),
         "Общий_балл": round(total_score, 1),
-        "Адрес": address,
-        "Телефон": phone,
+        "Адрес": fake.city(),
+        "Телефон": fake.phone_number()
     })
 
 df = pd.DataFrame(students)
+
 plt.figure(figsize=(15, 10))
 plt.subplot(2, 2, 1)
 subject_columns = ['Балл_Математика', 'Балл_Физика', 'Балл_Язык']
