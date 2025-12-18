@@ -21,11 +21,12 @@ def arc(x, y, w, h, t1, t2):
 
 
 circle(0, 0.5, 2.4, "orange")
-circle(0, 1.0, 1.6, "gold")
+
 
 triangle([(-1.0, 2.0), (-1.5, 2.8), (-0.5, 2.7)], "gold")
 triangle([( 1.0, 2.0), ( 1.5, 2.8), ( 0.5, 2.7)], "gold")
-
+ellipse(0, -1.2, 3.0, 3.8, "gold")
+circle(0, 1.0, 1.6, "gold")
 circle(-0.55, 1.45, 0.35, "white")
 circle( 0.55, 1.45, 0.35, "white")
 
@@ -37,8 +38,8 @@ triangle([(-0.25, 1.1), (0.25, 1.1), (0, 1.25)], "black")
 arc(0, 1.0, 0.9, 0.6, 230, 310)
 arc(0, 1.0, 0.9, 0.6, 350, 430)
 
-ellipse(0, -1.2, 3.0, 3.8, "gold")
-ellipse(-0.9, -2.6, 1.1, 0.55, "gold")
-ellipse( 0.9, -2.6, 1.1, 0.55, "gold")
+
+ellipse(-0.9, -2.7, 1.1, 0.55, "gold")
+ellipse( 0.9, -2.7, 1.1, 0.55, "gold")
 
 plt.show()
